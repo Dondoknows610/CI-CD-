@@ -1,0 +1,45 @@
+name: ZAP baseline scan (CI)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  zap_baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Ensure docker available
+        run: |
+          docker --version
+
+      - name: Run ZAP baseline scan (docker)
+        env:
+          TARGET: ${{ secrets.TARGET_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "$TARGET" ]; then
+            echo "ERROR: TARGET (TARGET_URL) secret is not set"
+            exit 1
+          fi
+
+          echo "Running ZAP baseline scan against: $TARGET"
+
+          # create output dir
+          mkdir -p zap-reports
+
+          # pull the stable ZAP image and run a baseline scan that writes an HTML report
+          docker pull owasp/zap2docker-stable
+          docker run --rm -v "$(pwd)":/zap/wrk/:rw owasp/zap2docker-stable \
+            zap-baseline.py -t "$TARGET" -r zap-reports/zap-baseline-report.html
+
+          echo "ZAP done, report saved to zap-reports/zap-baseline-report.html"
+
+      - name: Upload ZAP report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: zap-reports/
