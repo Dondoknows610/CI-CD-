@@ -1,5 +1,5 @@
-import type { FlowSlice } from './finance'
-import { formatMoney } from './finance'
+import type { FlowSlice } from './types'
+import { formatMoney } from './money'
 
 const KIND_COLORS: Record<FlowSlice['kind'], string> = {
   income: 'var(--c-income)',
@@ -148,84 +148,89 @@ export function Circlegram({
 
 type OrbitCompareProps = {
   months: number
-  rentNet: number
-  buyNet: number
-  rentEquity: number
-  buyEquity: number
-  rentCash: number
-  buyCash: number
+  leftLabel?: string
+  rightLabel?: string
+  leftNet: number
+  rightNet: number
+  leftEquity: number
+  rightEquity: number
+  leftCash: number
+  rightCash: number
+  caption?: string
 }
 
 export function OrbitCompare({
   months,
-  rentNet,
-  buyNet,
-  rentEquity,
-  buyEquity,
-  rentCash,
-  buyCash,
+  leftLabel = 'Left',
+  rightLabel = 'Right',
+  leftNet,
+  rightNet,
+  leftEquity,
+  rightEquity,
+  leftCash,
+  rightCash,
+  caption,
 }: OrbitCompareProps) {
-  const max = Math.max(Math.abs(rentNet), Math.abs(buyNet), 1)
-  const rentR = 48 + (Math.abs(rentNet) / max) * 72
-  const buyR = 48 + (Math.abs(buyNet) / max) * 72
+  const max = Math.max(Math.abs(leftNet), Math.abs(rightNet), 1)
+  const leftR = 48 + (Math.abs(leftNet) / max) * 72
+  const rightR = 48 + (Math.abs(rightNet) / max) * 72
   const size = 420
   const height = 360
   const cy = height * 0.52
-  const rentCx = size * 0.28
-  const buyCx = size * 0.72
+  const leftCx = size * 0.28
+  const rightCx = size * 0.72
 
   return (
     <div className="orbit-compare">
-      <svg viewBox={`0 0 ${size} ${height}`} width="100%" role="img" aria-label="Rent vs buy net position">
+      <svg
+        viewBox={`0 0 ${size} ${height}`}
+        width="100%"
+        role="img"
+        aria-label={`${leftLabel} vs ${rightLabel}`}
+      >
         <defs>
-          <radialGradient id="rentGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--c-sunk)" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="var(--c-sunk)" stopOpacity="0.05" />
+          <radialGradient id="leftGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--c-income)" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="var(--c-income)" stopOpacity="0.05" />
           </radialGradient>
-          <radialGradient id="buyGlow" cx="50%" cy="50%" r="50%">
+          <radialGradient id="rightGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="var(--c-equity)" stopOpacity="0.65" />
             <stop offset="100%" stopColor="var(--c-equity)" stopOpacity="0.05" />
           </radialGradient>
         </defs>
 
-        <line
-          x1={rentCx}
-          y1={cy}
-          x2={buyCx}
-          y2={cy}
-          className="orbit-bridge"
-        />
+        <line x1={leftCx} y1={cy} x2={rightCx} y2={cy} className="orbit-bridge" />
 
         <g className="orbit-node rent-node">
-          <circle cx={rentCx} cy={cy} r={rentR * 1.35} fill="url(#rentGlow)" />
-          <circle cx={rentCx} cy={cy} r={rentR} className="orbit-disk rent" />
-          <text x={rentCx} y={cy - 10} textAnchor="middle" className="orbit-title">
-            Rent
+          <circle cx={leftCx} cy={cy} r={leftR * 1.35} fill="url(#leftGlow)" />
+          <circle cx={leftCx} cy={cy} r={leftR} className="orbit-disk rent" />
+          <text x={leftCx} y={cy - 10} textAnchor="middle" className="orbit-title">
+            {leftLabel}
           </text>
-          <text x={rentCx} y={cy + 14} textAnchor="middle" className="orbit-metric">
-            {formatMoney(rentNet, true)}
+          <text x={leftCx} y={cy + 14} textAnchor="middle" className="orbit-metric">
+            {formatMoney(leftNet, true)}
           </text>
-          <text x={rentCx} y={cy + rentR + 28} textAnchor="middle" className="orbit-sub">
-            Cash {formatMoney(rentCash, true)} · Equity {formatMoney(rentEquity, true)}
+          <text x={leftCx} y={cy + leftR + 28} textAnchor="middle" className="orbit-sub">
+            Cash {formatMoney(leftCash, true)} · Equity {formatMoney(leftEquity, true)}
           </text>
         </g>
 
         <g className="orbit-node buy-node">
-          <circle cx={buyCx} cy={cy} r={buyR * 1.35} fill="url(#buyGlow)" />
-          <circle cx={buyCx} cy={cy} r={buyR} className="orbit-disk buy" />
-          <text x={buyCx} y={cy - 10} textAnchor="middle" className="orbit-title">
-            Buy
+          <circle cx={rightCx} cy={cy} r={rightR * 1.35} fill="url(#rightGlow)" />
+          <circle cx={rightCx} cy={cy} r={rightR} className="orbit-disk buy" />
+          <text x={rightCx} y={cy - 10} textAnchor="middle" className="orbit-title">
+            {rightLabel}
           </text>
-          <text x={buyCx} y={cy + 14} textAnchor="middle" className="orbit-metric">
-            {formatMoney(buyNet, true)}
+          <text x={rightCx} y={cy + 14} textAnchor="middle" className="orbit-metric">
+            {formatMoney(rightNet, true)}
           </text>
-          <text x={buyCx} y={cy + buyR + 28} textAnchor="middle" className="orbit-sub">
-            Cash {formatMoney(buyCash, true)} · Equity {formatMoney(buyEquity, true)}
+          <text x={rightCx} y={cy + rightR + 28} textAnchor="middle" className="orbit-sub">
+            Cash {formatMoney(rightCash, true)} · Equity {formatMoney(rightEquity, true)}
           </text>
         </g>
 
         <text x={size / 2} y={36} textAnchor="middle" className="orbit-caption">
-          Net position after {months} months
+          {caption ?? `Comparison after ${months} months`}
         </text>
       </svg>
     </div>
