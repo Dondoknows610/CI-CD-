@@ -16,13 +16,17 @@ export type RentInputs = {
 
 export type BuyInputs = {
   homePrice: number
+  /** VA loans are typically 0% down */
   downPaymentPercent: number
   loanTermYears: number
   interestRatePercent: number
   propertyTaxAnnualRate: number
   homeInsuranceMonthly: number
   hoaMonthly: number
+  /** Gross closing costs before seller credits */
   closingCostPercent: number
+  /** Seller concessions applied at closing (can zero out cash to close) */
+  sellerCredits: number
   appreciationAnnualPercent: number
   maintenanceMonthly: number
 }
@@ -85,18 +89,33 @@ export const DEFAULT_RENT: RentInputs = {
   monthlyRent: 2900,
 }
 
-/** San Diego starter-home defaults — editable in the UI */
+/**
+ * San Diego + VA loan defaults.
+ * 0% down; seller credits cover typical closing (funding fee waived with disability).
+ */
 export const DEFAULT_BUY: BuyInputs = {
   homePrice: 650000,
-  downPaymentPercent: 5,
+  downPaymentPercent: 0,
   loanTermYears: 30,
-  interestRatePercent: 6.5,
+  interestRatePercent: 6.25,
   propertyTaxAnnualRate: 1.15,
   homeInsuranceMonthly: 180,
   hoaMonthly: 350,
   closingCostPercent: 2.5,
+  // 2.5% of $650k — matches closing so cash-to-close starts at $0
+  sellerCredits: 16250,
   appreciationAnnualPercent: 3,
   maintenanceMonthly: 200,
+}
+
+export function closingCosts(buy: BuyInputs): number {
+  return buy.homePrice * (buy.closingCostPercent / 100)
+}
+
+/** Cash needed at closing after down payment and seller credits */
+export function cashToClose(buy: BuyInputs): number {
+  const down = buy.homePrice * (buy.downPaymentPercent / 100)
+  return Math.max(0, down + closingCosts(buy) - buy.sellerCredits)
 }
 
 export function disabilityNet(income: IncomeInputs): number {
@@ -199,7 +218,8 @@ export function computeBuyPath(
 ): PathResult {
   const inc = monthlyIncome(income)
   const downPayment = buy.homePrice * (buy.downPaymentPercent / 100)
-  const closing = buy.homePrice * (buy.closingCostPercent / 100)
+  const outOfPocket = cashToClose(buy)
+  // Credits beyond cash-to-close don't create free cash here — they only zero the close
   const loan = Math.max(0, buy.homePrice - downPayment)
   const pi = mortgagePayment(loan, buy.interestRatePercent, buy.loanTermYears)
   const taxMonthly = (buy.homePrice * (buy.propertyTaxAnnualRate / 100)) / 12
@@ -220,11 +240,9 @@ export function computeBuyPath(
   const totalIncome = inc * months
   const totalHousing = housing * months
   const totalLiving = living.livingExpenses * months
-  // Cash after months, accounting for cash tied up in down payment + closing
   const operatingCash = cashFlow * months
-  const totalCash = operatingCash - downPayment - closing
-  const interestAndFees =
-    totalHousing - principalPaid // approx: payments beyond principal + taxes/ins/hoa/maint
+  const totalCash = operatingCash - outOfPocket
+  const interestAndFees = totalHousing - principalPaid
   const sunk = Math.max(0, interestAndFees)
 
   return {
@@ -238,7 +256,7 @@ export function computeBuyPath(
     totalSunkCost: round2(sunk),
     equityBuilt: round2(equity),
     netPosition: round2(totalCash + equity),
-    upfrontCash: round2(downPayment + closing),
+    upfrontCash: round2(outOfPocket),
     slices: [
       { id: 'equity', label: 'Equity built', amount: equity, kind: 'equity' },
       { id: 'sunk', label: 'Interest & ownership costs', amount: sunk, kind: 'sunk' },

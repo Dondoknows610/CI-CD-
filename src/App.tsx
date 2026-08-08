@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { Circlegram, OrbitCompare } from './Circlegram'
 import { Field, MoneyInput, RangeRow } from './Inputs'
 import {
+  cashToClose,
+  closingCosts,
   compareScenarios,
   DEFAULT_BUY,
   DEFAULT_INCOME,
@@ -168,7 +170,10 @@ export default function App() {
             </div>
 
             <div className="control-block">
-              <h3>Buy path · San Diego</h3>
+              <h3>Buy path · VA loan</h3>
+              <p className="inline-note">
+                0% down VA · disability funding fee waived · seller credits can cover closing
+              </p>
               <Field label="Home price">
                 <MoneyInput
                   value={buy.homePrice}
@@ -185,6 +190,15 @@ export default function App() {
                 format={(n) => `${n}%`}
                 onChange={(downPaymentPercent) => setBuy((s) => ({ ...s, downPaymentPercent }))}
               />
+              <p className="inline-note">
+                <button
+                  type="button"
+                  className="chip"
+                  onClick={() => setBuy((s) => ({ ...s, downPaymentPercent: 0 }))}
+                >
+                  VA 0% down
+                </button>
+              </p>
               <RangeRow
                 label="Interest rate"
                 value={buy.interestRatePercent}
@@ -196,6 +210,38 @@ export default function App() {
                   setBuy((s) => ({ ...s, interestRatePercent }))
                 }
               />
+              <RangeRow
+                label="Closing costs (gross)"
+                value={buy.closingCostPercent}
+                min={0}
+                max={5}
+                step={0.1}
+                format={(n) => `${n}% · ${formatMoney(closingCosts(buy))}`}
+                onChange={(closingCostPercent) => setBuy((s) => ({ ...s, closingCostPercent }))}
+              />
+              <Field label="Seller credits" hint="concessions at closing">
+                <MoneyInput
+                  value={buy.sellerCredits}
+                  onChange={(sellerCredits) => setBuy((s) => ({ ...s, sellerCredits }))}
+                  step={250}
+                />
+              </Field>
+              <p className="inline-note">
+                <button
+                  type="button"
+                  className="chip"
+                  onClick={() =>
+                    setBuy((s) => ({
+                      ...s,
+                      sellerCredits: Math.round(closingCosts(s)),
+                    }))
+                  }
+                >
+                  Cover all closing
+                </button>
+                {' · '}
+                Cash to close: <strong>{formatMoney(cashToClose(buy))}</strong>
+              </p>
               <Field label="HOA / month">
                 <MoneyInput
                   value={buy.hoaMonthly}
@@ -278,7 +324,11 @@ export default function App() {
             <p>
               {ahead} leads by{' '}
               <strong>{formatMoney(Math.abs(result.netAdvantage))}</strong> in net position
-              (cash + equity, after upfront buy costs).
+              (cash + equity
+              {result.buy.upfrontCash > 0
+                ? `, after ${formatMoney(result.buy.upfrontCash)} cash to close`
+                : ', with $0 cash to close via VA + seller credits'}
+              ).
             </p>
           </div>
 
@@ -306,7 +356,7 @@ export default function App() {
               <strong>{formatMoney(result.buy.monthlyHousing)}</strong>
             </div>
             <div role="listitem">
-              <span>Upfront to buy</span>
+              <span>Cash to close</span>
               <strong>{formatMoney(result.buy.upfrontCash)}</strong>
             </div>
           </div>
@@ -380,15 +430,17 @@ export default function App() {
                   {formatMoney(result.buy.totalHousingPaid)} total
                 </li>
                 <li>
-                  Cash after upfront: {formatMoney(result.buy.totalCashSaved)}
+                  Cash kept: {formatMoney(result.buy.totalCashSaved)}
                   <span className="dim">
                     {' '}
-                    (down + closing {formatMoney(result.buy.upfrontCash)})
+                    {result.buy.upfrontCash > 0
+                      ? `(cash to close ${formatMoney(result.buy.upfrontCash)})`
+                      : '(no cash to close — VA 0% down + seller credits)'}
                   </span>
                 </li>
                 <li>
                   Equity built: {formatMoney(result.buy.equityBuilt)}
-                  <span className="dim"> down + principal + appreciation</span>
+                  <span className="dim"> principal paid + appreciation</span>
                 </li>
                 <li>Net position: {formatMoney(result.buy.netPosition)}</li>
               </ul>

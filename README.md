@@ -10,7 +10,7 @@ Visualize San Diego cash flow as circlegrams — compare renting vs buying over 
 | School BAH + stipend | $3,800 |
 | Job (FOR) | $4,800 |
 | Rent scenarios | $2,900 or $3,500 (slider) |
-| Buy defaults | ~$650k SD home, 5% down, 6.5% rate |
+| Buy defaults | VA 0% down · seller credits cover closing · ~$650k SD home |
 
 ## Run locally
 
