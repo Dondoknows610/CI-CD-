@@ -38,19 +38,30 @@ export default function App() {
       <div className="atmosphere" aria-hidden />
 
       <header className="hero">
-        <p className="brand">Orbit</p>
-        <h1>Where your San Diego money goes</h1>
-        <p className="lede">
-          Circlegrams that weigh renting against buying — disability, school BAH, and paycheck
-          flowing into cash or equity over time.
-        </p>
-        <div className="hero-cta">
-          <a href="#compare" className="btn primary">
-            Compare paths
-          </a>
-          <a href="#inputs" className="btn ghost">
-            Tune numbers
-          </a>
+        <div className="hero-copy">
+          <p className="brand">Orbit</p>
+          <h1>Where your San Diego money goes</h1>
+          <p className="lede">
+            Circlegrams that weigh renting against buying — disability, school BAH, and paycheck
+            flowing into cash or equity over time.
+          </p>
+          <div className="hero-cta">
+            <a href="#compare" className="btn primary">
+              Compare paths
+            </a>
+            <a href="#inputs" className="btn ghost">
+              Tune numbers
+            </a>
+          </div>
+        </div>
+        <div className="hero-visual" aria-hidden>
+          <Circlegram
+            title="This month"
+            slices={inSlices}
+            centerValue={formatMoney(result.monthlyIncome, true)}
+            centerLabel="inflow"
+            animateKey={`hero-${result.monthlyIncome}`}
+          />
         </div>
       </header>
 
