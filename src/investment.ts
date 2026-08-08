@@ -427,12 +427,13 @@ export function analyzeInvestment(
     }
   } else if (
     best.id === 'refinance' &&
-    (refinance.monthlyCashFlowAfter < cashFlow.monthlyCashFlow - 50 || refinance.netCashFromRefi <= 0)
+    refinance.monthlyCashFlowAfter < cashFlow.monthlyCashFlow - 50 &&
+    refinance.netCashFromRefi <= 0
   ) {
     recommendation = {
       strategyId: 'keep_loan',
       title: 'Keep existing loan',
-      rationale: `Refinancing to ${refi.newRatePercent}% ${refinance.netCashFromRefi > 0 ? `pulls ${formatMoney(refinance.netCashFromRefi)} cash` : 'does not improve cash'} but ${refinance.paymentDelta >= 0 ? 'raises' : 'only modestly changes'} the payment. Keeping the existing VA loan preserves ${formatMoney(cashFlow.monthlyCashFlow)}/mo cash flow and ${formatMoney(keepFiveWealth)} projected 5-year wealth.`,
+      rationale: `Refinancing to ${refi.newRatePercent}% does not pull cash and worsens monthly cash flow by ${formatMoney(cashFlow.monthlyCashFlow - refinance.monthlyCashFlowAfter)}. Keeping the existing VA loan preserves ${formatMoney(cashFlow.monthlyCashFlow)}/mo cash flow and ${formatMoney(keepFiveWealth)} projected 5-year wealth.`,
     }
   } else if (best.id === 'sell') {
     recommendation = {
