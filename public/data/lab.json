@@ -1,27 +1,45 @@
 {
   "lab": {
-    "title": "Wazuh Docker Monitoring Lab",
+    "title": "Wazuh OVA Monitoring Lab",
     "student": "Julio Arredondo",
-    "courseNote": "System monitoring and security management — Docker Wazuh single-node deployment with three reporting agents."
+    "courseNote": "System monitoring and security management — Wazuh v4.14.7 OVA manager with endpoint agents for the Windows lab host and VPN server."
   },
   "architecture": [
     {
-      "id": "host",
-      "label": "Hosting laptop",
-      "role": "Wazuh agent",
-      "detail": "Endpoint visibility for the primary workstation"
+      "id": "manager",
+      "label": "Wazuh OVA VM",
+      "role": "Manager + dashboard",
+      "detail": "VirtualBox OVA v4.14.7 at 10.225.42.4 — wazuh-manager and wazuh-dashboard services active"
     },
     {
-      "id": "vm",
-      "label": "Lab VM",
-      "role": "Wazuh manager + agent",
-      "detail": "Docker single-node stack (manager, indexer, dashboard) plus local agent"
+      "id": "winvm",
+      "label": "WinVM",
+      "role": "Windows agent",
+      "detail": "Microsoft Windows 11 Enterprise Evaluation agent ID 001 at 10.225.42.3"
     },
     {
       "id": "vpn",
-      "label": "VPN server",
-      "role": "Wazuh agent",
-      "detail": "Remote VPN host reporting back to the manager"
+      "label": "vpn-server",
+      "role": "Ubuntu agent",
+      "detail": "Ubuntu VPN host agent ID 002 at 10.225.42.1 reporting to the OVA manager"
+    }
+  ],
+  "facts": [
+    {
+      "label": "Manager address",
+      "value": "10.225.42.4"
+    },
+    {
+      "label": "Platform",
+      "value": "Wazuh v4.14.7 OVA (VirtualBox)"
+    },
+    {
+      "label": "Active agents",
+      "value": "2 — WinVM (Windows 11) and vpn-server (Ubuntu)"
+    },
+    {
+      "label": "Cluster node",
+      "value": "node01"
     }
   ],
   "steps": [
@@ -29,37 +47,25 @@
       "id": "install",
       "number": "01",
       "title": "Setup and installation",
-      "summary": "Deploy Wazuh as a Docker single-node stack on the lab VM, including the host sysctl prerequisite.",
+      "summary": "Deployed Wazuh using the official VirtualBox OVA instead of Docker. Manager and dashboard services are enabled and running on the lab VM.",
       "actions": [
-        "Choose Docker single-node installation on an existing VM",
-        "Clone the official Wazuh Docker single-node deployment",
-        "Run sysctl -w vm.max_map_count=262144 on the host so the indexer can start",
-        "Bring up the Wazuh manager, indexer, and dashboard containers"
+        "Imported the Wazuh v4.14.7 OVA into Oracle VirtualBox",
+        "Confirmed wazuh-dashboard.service is active (running) and enabled on boot",
+        "Confirmed wazuh-manager.service is active (running) via wazuh-control start",
+        "Opened the Wazuh dashboard Endpoints view and Deploy new agent workflow"
       ],
       "evidence": [
         {
-          "id": "docker-clone",
-          "title": "Docker single-node clone / compose",
-          "filename": "01-docker-single-node.png",
-          "caption": "Repository clone or docker compose listing for the Wazuh single-node stack"
+          "id": "ova-services",
+          "title": "OVA manager + dashboard running",
+          "filename": "01-ova-services-running.png",
+          "caption": "systemctl status showing wazuh-dashboard and wazuh-manager active on the Wazuh v4.14.7 OVA"
         },
         {
-          "id": "sysctl",
-          "title": "vm.max_map_count prerequisite",
-          "filename": "02-sysctl-max-map-count.png",
-          "caption": "Host command showing vm.max_map_count set to 262144"
-        },
-        {
-          "id": "containers-up",
-          "title": "Containers running",
-          "filename": "03-docker-ps-wazuh.png",
-          "caption": "docker ps (or equivalent) showing Wazuh manager, indexer, and dashboard healthy"
-        },
-        {
-          "id": "dashboard-login",
-          "title": "Wazuh dashboard",
-          "filename": "04-wazuh-dashboard.png",
-          "caption": "Wazuh web UI reachable after Docker deployment"
+          "id": "deploy-agent-ui",
+          "title": "Deploy new agent UI",
+          "filename": "02-deploy-new-agent.png",
+          "caption": "Wazuh dashboard Deploy new agent page for packaging, server address, and agent name"
         }
       ]
     },
@@ -67,39 +73,38 @@
       "id": "agents",
       "number": "02",
       "title": "Configuration for monitoring",
-      "summary": "Install and point three Wazuh agents at the manager, then confirm they are all connected.",
+      "summary": "Enrolled endpoint agents against manager 10.225.42.4. The VPN host was installed from the 4.14.7 DEB package as vpn-server; WinVM appears as an active Windows agent in the dashboard.",
       "actions": [
-        "Configure the Wazuh agent on the hosting laptop to reach the manager on the VM",
-        "Install and configure the Wazuh agent on the VM itself",
-        "Configure the Wazuh agent on the VPN server from the previous assignment",
-        "Verify all three agents are reporting correctly in the Wazuh manager"
+        "Installed wazuh-agent 4.14.7 on the VPN host with WAZUH_MANAGER=10.225.42.4 and WAZUH_AGENT_NAME=vpn-server",
+        "Enabled and started wazuh-agent with systemctl on the VPN host",
+        "Registered/connected the Windows lab endpoint as agent WinVM (10.225.42.3)",
+        "Verified Endpoints view shows both agents active under the default group"
       ],
       "evidence": [
         {
-          "id": "agent-laptop",
-          "title": "Host laptop agent",
-          "filename": "05-agent-host-laptop.png",
-          "caption": "Agent install/config on the hosting laptop pointing at the Wazuh manager"
-        },
-        {
-          "id": "agent-vm",
-          "title": "VM agent",
-          "filename": "06-agent-vm.png",
-          "caption": "Agent installed on the same VM that hosts the Docker manager"
-        },
-        {
-          "id": "agent-vpn",
-          "title": "VPN server agent",
-          "filename": "07-agent-vpn-server.png",
-          "caption": "Agent on the previously configured VPN server reporting to the manager"
+          "id": "agent-vpn-install",
+          "title": "VPN server agent install",
+          "filename": "03-agent-vpn-install.png",
+          "caption": "curl + dpkg install of wazuh-agent_4.14.7 with manager 10.225.42.4 and name vpn-server, then systemctl enable/start"
         },
         {
           "id": "agents-connected",
-          "title": "All agents reporting",
-          "filename": "08-agents-connected.png",
-          "caption": "Wazuh UI or agent list showing laptop, VM, and VPN agents as active/connected"
+          "title": "Active agents in Endpoints",
+          "filename": "04-agents-endpoints-active.png",
+          "caption": "Endpoints summary with 2 active agents: WinVM (Windows 11) and vpn-server (Ubuntu 26.04)"
         }
       ]
     }
-  ]
+  ],
+  "verification": {
+    "title": "Agents reporting to the manager",
+    "summary": "The OVA manager is healthy and two agents are active. Assignment asks for three monitored components (hosting laptop, VM, VPN). Current evidence covers the OVA VM plus WinVM and vpn-server; add a third agent if the hosting laptop is still separate from WinVM.",
+    "checks": [
+      "Wazuh OVA imported and powered on in VirtualBox",
+      "wazuh-manager.service and wazuh-dashboard.service active",
+      "WinVM agent active (ID 001, 10.225.42.3, Windows 11)",
+      "vpn-server agent active (ID 002, 10.225.42.1, Ubuntu)",
+      "Optional remaining item: dedicated hosting-laptop agent if WinVM is not that host"
+    ]
+  }
 }

@@ -81,6 +81,7 @@ function render(lab, steps) {
   const [install, agents] = steps;
   const presentCount = steps.flatMap((step) => step.evidence).filter((item) => item.present).length;
   const totalCount = steps.flatMap((step) => step.evidence).length;
+  const verification = lab.verification || {};
 
   app.innerHTML = `
     <section class="hero" aria-labelledby="brand-hero">
@@ -96,16 +97,16 @@ function render(lab, steps) {
 
     <section class="section" id="architecture">
       <p class="section-kicker">Monitoring targets</p>
-      <h2>Three endpoints, one manager</h2>
+      <h2>OVA manager with enrolled agents</h2>
       <p class="lede">
-        The Docker Wazuh stack on the lab VM collects alerts from the hosting laptop,
-        the VM itself, and the VPN server configured in the previous assignment.
+        The Wazuh VirtualBox OVA collects endpoint telemetry from the Windows lab host
+        and the Ubuntu VPN server configured in the previous assignment.
       </p>
       <div class="arch-grid">
         ${lab.architecture
           .map(
             (node) => `
-          <article class="arch-node ${node.id === "vm" ? "hub" : ""}">
+          <article class="arch-node ${node.id === "manager" ? "hub" : ""}">
             <span class="role">${escapeHtml(node.role)}</span>
             <h3>${escapeHtml(node.label)}</h3>
             <p>${escapeHtml(node.detail)}</p>
@@ -113,8 +114,19 @@ function render(lab, steps) {
           )
           .join("")}
       </div>
+      <div class="facts-grid">
+        ${(lab.facts || [])
+          .map(
+            (fact) => `
+          <div class="fact-card">
+            <span>${escapeHtml(fact.label)}</span>
+            <strong>${escapeHtml(fact.value)}</strong>
+          </div>`
+          )
+          .join("")}
+      </div>
       <p class="flow">
-        Host laptop agent → VM Docker manager ← VM local agent · VPN server agent → VM Docker manager
+        WinVM (10.225.42.3) → Wazuh OVA manager (10.225.42.4) ← vpn-server (10.225.42.1)
       </p>
     </section>
 
@@ -125,17 +137,15 @@ function render(lab, steps) {
       <p class="section-kicker">Outcome</p>
       <h2>Verification checklist</h2>
       <div class="verify-panel">
-        <h3>Agents reporting to the manager</h3>
-        <p>
-          Success for this lab means the Wazuh dashboard (or agent control list) shows
-          active agents for the hosting laptop, the VM, and the VPN server.
-        </p>
+        <h3>${escapeHtml(verification.title || "Agents reporting to the manager")}</h3>
+        <p>${escapeHtml(
+          verification.summary ||
+            "Confirm enrolled agents are active in the Wazuh Endpoints view."
+        )}</p>
         <ul class="checklist">
-          <li>Docker single-node stack is up (manager, indexer, dashboard)</li>
-          <li><code>vm.max_map_count=262144</code> applied on the host</li>
-          <li>Laptop agent enrolled and connected</li>
-          <li>VM agent enrolled and connected</li>
-          <li>VPN server agent enrolled and connected</li>
+          ${(verification.checks || [])
+            .map((check) => `<li>${escapeHtml(check)}</li>`)
+            .join("")}
         </ul>
       </div>
     </section>

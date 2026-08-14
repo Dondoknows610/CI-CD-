@@ -1,9 +1,9 @@
 # Wazuh Lab Demonstration
 
-Static walkthrough of the Docker Wazuh deployment and multi-agent monitoring lab:
+Static walkthrough of Julio Arredondo’s Wazuh monitoring lab:
 
-- Wazuh manager (single-node Docker) on a VM
-- Agents on the host laptop, the VM itself, and the previously configured VPN server
+- Wazuh **v4.14.7 OVA** manager/dashboard in VirtualBox (`10.225.42.4`)
+- Active agents: **WinVM** (Windows 11, `10.225.42.3`) and **vpn-server** (Ubuntu, `10.225.42.1`)
 
 ## Run locally
 
@@ -15,4 +15,11 @@ Open [http://localhost:4173](http://localhost:4173).
 
 ## Screenshots
 
-Drop evidence images into `public/screenshots/` using the filenames listed in `public/screenshots/manifest.json`, then refresh the page. The demo page will pick them up automatically.
+Copy evidence images into `public/screenshots/` using these filenames:
+
+| File | What it shows |
+| --- | --- |
+| `01-ova-services-running.png` | `wazuh-dashboard` + `wazuh-manager` active on the OVA |
+| `02-deploy-new-agent.png` | Dashboard “Deploy new agent” page |
+| `03-agent-vpn-install.png` | VPN host `dpkg` install as `vpn-server` → `10.225.42.4` |
+| `04-agents-endpoints-active.png` | Endpoints view with WinVM + vpn-server active |
