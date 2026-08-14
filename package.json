@@ -1,0 +1,9 @@
+{
+  "name": "wazuh-lab-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demonstration of a Docker-based Wazuh monitoring lab",
+  "scripts": {
+    "start": "npx --yes serve public -l 4173"
+  }
+}

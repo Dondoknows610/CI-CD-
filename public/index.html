@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wazuh Lab — Monitoring Demonstration</title>
+    <meta
+      name="description"
+      content="Demonstration of a Docker Wazuh single-node deployment monitoring a host laptop, lab VM, and VPN server."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Wazuh Lab</span>
+      </a>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#architecture">Architecture</a>
+        <a href="#install">Installation</a>
+        <a href="#agents">Agents</a>
+        <a href="#verify">Verification</a>
+      </nav>
+    </header>
+
+    <main id="app" class="app">
+      <p class="loading">Loading lab demonstration…</p>
+    </main>
+
+    <dialog id="lightbox" class="lightbox" aria-label="Screenshot preview">
+      <form method="dialog">
+        <button type="submit" class="lightbox-close" aria-label="Close">Close</button>
+      </form>
+      <img id="lightboxImage" alt="" />
+      <p id="lightboxCaption"></p>
+    </dialog>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

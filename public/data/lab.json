@@ -1,0 +1,105 @@
+{
+  "lab": {
+    "title": "Wazuh Docker Monitoring Lab",
+    "student": "Julio Arredondo",
+    "courseNote": "System monitoring and security management — Docker Wazuh single-node deployment with three reporting agents."
+  },
+  "architecture": [
+    {
+      "id": "host",
+      "label": "Hosting laptop",
+      "role": "Wazuh agent",
+      "detail": "Endpoint visibility for the primary workstation"
+    },
+    {
+      "id": "vm",
+      "label": "Lab VM",
+      "role": "Wazuh manager + agent",
+      "detail": "Docker single-node stack (manager, indexer, dashboard) plus local agent"
+    },
+    {
+      "id": "vpn",
+      "label": "VPN server",
+      "role": "Wazuh agent",
+      "detail": "Remote VPN host reporting back to the manager"
+    }
+  ],
+  "steps": [
+    {
+      "id": "install",
+      "number": "01",
+      "title": "Setup and installation",
+      "summary": "Deploy Wazuh as a Docker single-node stack on the lab VM, including the host sysctl prerequisite.",
+      "actions": [
+        "Choose Docker single-node installation on an existing VM",
+        "Clone the official Wazuh Docker single-node deployment",
+        "Run sysctl -w vm.max_map_count=262144 on the host so the indexer can start",
+        "Bring up the Wazuh manager, indexer, and dashboard containers"
+      ],
+      "evidence": [
+        {
+          "id": "docker-clone",
+          "title": "Docker single-node clone / compose",
+          "filename": "01-docker-single-node.png",
+          "caption": "Repository clone or docker compose listing for the Wazuh single-node stack"
+        },
+        {
+          "id": "sysctl",
+          "title": "vm.max_map_count prerequisite",
+          "filename": "02-sysctl-max-map-count.png",
+          "caption": "Host command showing vm.max_map_count set to 262144"
+        },
+        {
+          "id": "containers-up",
+          "title": "Containers running",
+          "filename": "03-docker-ps-wazuh.png",
+          "caption": "docker ps (or equivalent) showing Wazuh manager, indexer, and dashboard healthy"
+        },
+        {
+          "id": "dashboard-login",
+          "title": "Wazuh dashboard",
+          "filename": "04-wazuh-dashboard.png",
+          "caption": "Wazuh web UI reachable after Docker deployment"
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "number": "02",
+      "title": "Configuration for monitoring",
+      "summary": "Install and point three Wazuh agents at the manager, then confirm they are all connected.",
+      "actions": [
+        "Configure the Wazuh agent on the hosting laptop to reach the manager on the VM",
+        "Install and configure the Wazuh agent on the VM itself",
+        "Configure the Wazuh agent on the VPN server from the previous assignment",
+        "Verify all three agents are reporting correctly in the Wazuh manager"
+      ],
+      "evidence": [
+        {
+          "id": "agent-laptop",
+          "title": "Host laptop agent",
+          "filename": "05-agent-host-laptop.png",
+          "caption": "Agent install/config on the hosting laptop pointing at the Wazuh manager"
+        },
+        {
+          "id": "agent-vm",
+          "title": "VM agent",
+          "filename": "06-agent-vm.png",
+          "caption": "Agent installed on the same VM that hosts the Docker manager"
+        },
+        {
+          "id": "agent-vpn",
+          "title": "VPN server agent",
+          "filename": "07-agent-vpn-server.png",
+          "caption": "Agent on the previously configured VPN server reporting to the manager"
+        },
+        {
+          "id": "agents-connected",
+          "title": "All agents reporting",
+          "filename": "08-agents-connected.png",
+          "caption": "Wazuh UI or agent list showing laptop, VM, and VPN agents as active/connected"
+        }
+      ]
+    }
+  ]
+}
